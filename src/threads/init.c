@@ -62,7 +62,18 @@ static void paging_init (void);
 
 static char **read_command_line (void);
 static char **parse_options (char **argv);
+
+#define SHELL_PROMPT "wm"
+#define SHELL_WHOAMI "Walter Maia"
+#define SHELL_MAX_LINE 128
+
 static void run_actions (char **argv);
+#define SHELL_PROMPT "wm"
+#define SHELL_WHOAMI "Walter Maia"
+#define SHELL_MAX_LINE 128
+
+static void kernel_shell (void);
+static void kernel_shell_read_line (char *buffer, size_t size);
 static void usage (void);
 
 #ifdef FILESYS
@@ -129,12 +140,10 @@ pintos_init (void)
 
   printf ("Boot complete.\n");
   
-  if (*argv != NULL) {
-    /* Run actions specified on kernel command line. */
+  if (argv[0] == NULL)
+    kernel_shell ();
+  else
     run_actions (argv);
-  } else {
-    // TODO: no command line passed to kernel. Run interactively 
-  }
 
   /* Finish up. */
   shutdown ();
@@ -430,4 +439,56 @@ locate_block_device (enum block_type role, const char *name)
       block_set_role (role, block);
     }
 }
+
 #endif
+
+static void kernel_shell (void)
+{
+  char line[SHELL_MAX_LINE];
+
+  for (;;)
+    {
+      printf ("%s> ", SHELL_PROMPT);
+      kernel_shell_read_line (line, sizeof line);
+
+      if (!strcmp (line, "whoami"))
+        printf ("%s\n", SHELL_WHOAMI);
+      else if (!strcmp (line, "exit"))
+        break;
+      else
+        printf ("invalid command\n");
+    }
+}
+
+
+static void kernel_shell_read_line (char *buffer, size_t size)
+{
+  size_t i = 0;
+
+  for (;;)
+    {
+      char c = input_getc ();
+
+      if (c == '\n' || c == '\r')
+        {
+          putchar ('\n');
+          buffer[i] = '\0';
+          return;
+        }
+      else if ((c == '\b' || c == 127) && i > 0)
+        {
+          i--;
+          putchar ('\b');
+          putchar (' ');
+          putchar ('\b');
+        }
+      else if (c >= 32 && c <= 126)
+        {
+          if (i + 1 < size)
+            {
+              buffer[i++] = c;
+              putchar (c);
+            }
+        }
+    }
+}

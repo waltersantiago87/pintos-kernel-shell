@@ -16,10 +16,16 @@ O shell apresenta o seguinte comportamento:
 
   ```text
   wm>
-Comandos suportados:
-whoami → imprime o nome do autor
-exit → encerra o shell e permite que o kernel finalize
 
-qualquer outro comando → imprime:
+- Comandos suportados:
 
-invalid command
+  ```text
+  wm> whoami
+  imprime o nome do autor
+
+  wm> exit
+  encerra o shell e permite que o kernel finalize
+
+  wm> qualquer outro comando
+  imprime invalid command
+
